@@ -4,7 +4,7 @@ const { Country, Activities } = require("../../db.js");
 const createCountriesToDb = async () => {
   const apiInfo = await axios.get("https://restcountries.com/v3/all");
   // console.log(apiInfo.data)
-  const data = await apiInfo.data.map((el) => {
+  const data = apiInfo? await apiInfo.data.map((el) => {
     return {
       id: el.cca3,
       name: el.name.common,
@@ -15,7 +15,7 @@ const createCountriesToDb = async () => {
       population: el.population,
       flags: el.flags[1],
     };
-  });
+  }) : console.log("Loading countries api");
 
   data.forEach((country) => {
     Country.findOrCreate({
