@@ -16,12 +16,14 @@ router.get("/", async (req, res) => {
     if(!name){
       res.status(200).send(allCountries);
     }else{
-      const findedCountry = await findCountryByName(name);
+      const country = await findCountryByName(name);
 
-      if(!findedCountry){
+      if(!country){
+        // res.status(404).send(null);
         throw new Error("Country with this name not found");
       }
-      res.status(200).send(findedCountry);
+
+      res.status(200).send(country);
     }
   } catch (error) {
     res.status(404).send(error.message);

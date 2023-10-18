@@ -7,10 +7,11 @@ router.get("/", async(req, res)=>{
   const activities = await getAllActivitiesDb()
 
   try {
-    activities.length > 0 ? res.status(200).send(activities) 
-    : res.status(400).send("No activities created");
+    if(activities.length === 0) throw new Error("No activities created.");
+    
+    res.status(200).send(activities) 
   } catch (error) {
-      res.status(500).send(error.message)
+    res.status(500).send(error.message)
   }
 })
 

@@ -72,13 +72,17 @@ const findCountryByName = async(name) => {
     name = name.trim();
     name = name[0].toUpperCase() + name.toLowerCase().slice(1)
 
-    const finded = await Country.findOne({
+    // const countriesFinded = []
+
+    const findCountry = await Country.findOne({
       where: {
         name : name
       }
-    })
+    });
+    // countriesFinded.push(findCountry);
+    // if(!findCountry) return null;
 
-    return finded;
+    return findCountry;
 }
 const findCountryById = async (id, countries) => {
   return await countries.find(
