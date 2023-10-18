@@ -17,8 +17,8 @@ const createCountriesToDb = async () => {
     };
   }) : console.log("Loading countries api");
 
-  data.forEach((country) => {
-    Country.findOrCreate({
+  data.forEach(async(country) => {
+    await Country.findOrCreate({
       where: {
         id: country.id,
         name: country.name,
@@ -46,11 +46,11 @@ const getAllCountriesDb = async () => {
       },
     ],
   });
-  // console.log("hellouuuuu",allCountries)
+  
   return allCountries;
 };
 
-const getAllActivities = async () => {
+const getAllActivitiesDb = async () => {
   const data = await Activities.findAll({
     include: [
       {
@@ -64,39 +64,59 @@ const getAllActivities = async () => {
       },
     ],
   });
-  // console.log("getAllActivities", data)
+  
   return data;
 };
 
-const findCountryById = (id, countries) => {
-  const filterCountry = countries.find(
+const findCountryByName = async(name) => {
+    name = name.trim();
+    name = name[0].toUpperCase() + name.toLowerCase().slice(1)
+
+    const finded = await Country.findOne({
+      where: {
+        name : name
+      }
+    })
+
+    return finded;
+}
+const findCountryById = async (id, countries) => {
+  return await countries.find(
     (country) => country.id.toLowerCase() === id.toLowerCase());
-  // console.log("soy el find()" , filterCountry)
-  if (!filterCountry) {
-    throw new Error("A country with that ID was not found");
-  }
-  return filterCountry;
 };
 
 const createActivity = async (name, difficulty, duration, season, paises) => {
-  let newActivity = await Activities.create({
-    name,
-    difficulty,
-    duration,
-    season,
-  });
-  const countries = await Country.findAll({
+  let existingActivity = await Activities.findOne({
     where: {
-      name: paises,
-    },
+      name: name
+    }
+    
   });
-  console.log(countries)
-  newActivity.addCountry(countries);
+
+  if(existingActivity){
+    throw new Error("Activity has already been created");
+  }else{
+    const newActivity = await Activities.create({
+      name,
+      difficulty,
+      duration,
+      season,
+    });
+  
+    const countries = await Country.findAll({
+      where: {
+        name: paises,
+      },
+    });
+  
+    await newActivity.addCountry(countries);
+  }
 };
 
 module.exports = {
   getAllCountriesDb,
-  getAllActivities,
+  getAllActivitiesDb,
+  findCountryByName,
   findCountryById,
   createCountriesToDb,
   createActivity,

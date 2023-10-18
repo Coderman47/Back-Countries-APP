@@ -1,6 +1,7 @@
 const { Router } = require("express");
 const {
   getAllCountriesDb,
+  findCountryByName,
   findCountryById,
 } = require("./controllers.js");
 
@@ -8,33 +9,33 @@ const router = Router();
 
 router.get("/", async (req, res) => {
   const { name } = req.query;
+
   const allCountries = await getAllCountriesDb();
+  
   try {
-    if (name) {
-      const filterCountry = await allCountries.filter((country) =>
-      country.name.toLowerCase().includes(name.toLowerCase())
-      );
-      filterCountry ? res.status(200).send(filterCountry) : res.status(400).send("That country does not exist");
-    } else {
+    if(!name){
       res.status(200).send(allCountries);
+    }else{
+      const findedCountry = await findCountryByName(name);
+
+      if(!findedCountry){
+        throw new Error("Country with this name not found");
+      }
+      res.status(200).send(findedCountry);
     }
   } catch (error) {
-    throw new Error(error);
+    res.status(404).send(error.message);
   }
 });
 
-router.get("/allCountries", async (req, res)=>{
-  const allCountries = await getAllCountriesDb()
-  res.status(200).send(allCountries)
-})
-
 router.get("/:id", async (req, res) => {
+  
+  const { id } = req.params;
+  const allCountries = await getAllCountriesDb();
+  const filterCountry = await findCountryById(id, allCountries);
+
   try {
-    const { id } = req.params;
-    const allCountries = await getAllCountriesDb();
-    // console.log("findCountry()", allCountries)
-    const filterCountries = await findCountryById(id, allCountries);
-    filterCountries ? res.status(200).send(filterCountries) : res.status(400).send("Country not found by ID");
+    filterCountry ? res.status(200).send(filterCountry) : res.status(400).send("Country not found by ID");
   } catch (error) {
     throw new Error(error);
   }

@@ -1,35 +1,39 @@
 const { Router } = require("express");
-const { createActivity, getAllActivities } = require("./controllers.js");
+const { createActivity, getAllActivitiesDb } = require("./controllers.js");
 
 const router = Router();
 
 router.get("/", async(req, res)=>{
+  const activities = await getAllActivitiesDb()
+
   try {
-      const activities = await getAllActivities()
-      res.status(200).send(activities)
+    activities.length > 0 ? res.status(200).send(activities) 
+    : res.status(400).send("No activities created");
   } catch (error) {
-      res.status(400).send(error)
+      res.status(500).send(error.message)
   }
 })
 
 router.post("/", async (req, res) => {
   const { name, difficulty, duration, season, countries } = req.body;
+  
   try {
-    const newActivity = await createActivity(
-      name,
-      difficulty,
-      duration,
-      season,
-      countries
-    );
     if(!name || !difficulty || !duration || !season || !countries){
-      res.status(400).send("Missing fields")
-      window.location.reload()
+      res.status(400).send("Missing fields");
     }else{
+      await createActivity(
+          name,
+          difficulty,
+          duration,
+          season,
+          countries,
+          res
+          );
+  
       res.status(200).send("Activity created successfully");
     }
   } catch (error) {
-    res.status(400).send(error);
+    res.status(500).send(error.message);
   }
 });
 
